@@ -3,6 +3,14 @@ import {
 } from '@phosphor/disposable';
 
 import {
+  toArray
+} from "@phosphor/algorithm";
+
+import {
+  PanelLayout
+} from "@phosphor/widgets";
+
+import {
   JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
@@ -54,11 +62,27 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
 }
 
 /**
- * Activate the extension.
+ * A notebook widget extension that removes the save button
  */
+export
+class RemoveSaveButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+  createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
+    let toolbar = panel.toolbar;
+
+    // remove the save button
+    const pos = toArray(toolbar.names()).indexOf('save');
+    let layout = toolbar.layout as PanelLayout;
+    let widget = layout.widgets[pos];
+    widget.parent = null;
+
+    return new DisposableDelegate(() => {});
+  }
+}
+
 function activate(app: JupyterLab) {
   console.log('JupyterLab extension toolbar_launcher_button is activated!');
   app.docRegistry.addWidgetExtension('Notebook', new ButtonExtension());
+  app.docRegistry.addWidgetExtension('Notebook', new RemoveSaveButtonExtension());
 };
 
 export default extension;
